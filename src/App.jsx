@@ -664,7 +664,7 @@ const navigateToSection = (sectionId) => {
   </div>
 </section>
       {/* SKILLS SECTION */}
-      <section id="skills" className="py-5 px-10 bg-gradient-to-b from-black via-gray-900 to-black">
+      <section id="skills" className="py-24 px-10 bg-gradient-to-b from-black via-gray-900 to-black">
         <div className="max-w-6xl mx-auto">
           <motion.h2 
             initial={{ opacity: 0, y: 50 }}
