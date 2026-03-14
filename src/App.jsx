@@ -1467,7 +1467,7 @@ const navigateToSection = (sectionId) => {
         <span className="cursor-pointer hover:text-orange-500 transition-colors">Cookie Policy</span>
       </motion.div>
 
-      <motion.p 
+      {/* <motion.p 
         initial={{ opacity: 0, y: 20 }}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true }}
@@ -1475,7 +1475,7 @@ const navigateToSection = (sectionId) => {
         className="text-xs text-gray-600"
       >
         Built with React & Tailwind CSS
-      </motion.p>
+      </motion.p> */}
     </div>
 
     {/* Back to Top Button */}
