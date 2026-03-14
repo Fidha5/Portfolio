@@ -635,9 +635,8 @@ const navigateToSection = (sectionId) => {
         >
           As a developer, I am always eager to learn new technologies and improve my skills to create better and more engaging user experiences.
         </motion.p>
-
         {/* Stats Section */}
-        <motion.div 
+        {/* <motion.div 
           initial={{ opacity: 0, y: 50 }}
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ delay: 1 }}
@@ -659,13 +658,13 @@ const navigateToSection = (sectionId) => {
               <div className="text-xs text-gray-500">{stat.label}</div>
             </motion.div>
           ))}
-        </motion.div>
+        </motion.div> */}
       </div>
     </motion.div>
   </div>
 </section>
       {/* SKILLS SECTION */}
-      <section id="skills" className="py-24 px-10 bg-gradient-to-b from-black via-gray-900 to-black">
+      <section id="skills" className="py-5 px-10 bg-gradient-to-b from-black via-gray-900 to-black">
         <div className="max-w-6xl mx-auto">
           <motion.h2 
             initial={{ opacity: 0, y: 50 }}
@@ -717,7 +716,7 @@ const navigateToSection = (sectionId) => {
       </section>
 
       {/* PROJECTS SECTION */}
-      <section id="projects" className="py-24 px-10">
+      <section id="projects" className="py-20 px-10">
         <div className="max-w-6xl mx-auto">
           <motion.h2 
             initial={{ opacity: 0, y: 50 }}
