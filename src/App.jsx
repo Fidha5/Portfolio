@@ -154,7 +154,7 @@ const navigateToSection = (sectionId) => {
   // Social media links
   const socialLinks = {
     instagram: 'https://www.instagram.com/',
-    github: 'https://github.com/',
+    github: 'https://github.com/Fidha5',
     linkedin: 'https://www.linkedin.com/in/fidhacp',
     email: 'mailto:fidfidha07@gmail.com',
     phone: 'tel:+919633452534',
