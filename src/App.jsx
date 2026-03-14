@@ -327,34 +327,87 @@ const navigateToSection = (sectionId) => {
           />
         </div>
 
-        {/* Profile image */}
-        {/* Profile image - IMPROVED QUALITY */}
+     {/* Profile Image - Holographic */}
 <motion.div
   initial={{ scale: 0, rotate: -180 }}
   animate={{ scale: 1, rotate: 0 }}
   transition={{ type: "spring", duration: 1.5 }}
-  className="relative mb-8"
+  className="relative mb-8 group"
 >
-  <div className="absolute inset-0 rounded-full bg-gradient-to-r from-orange-500 to-pink-500 blur-lg opacity-75"></div>
-  <div className="relative w-44 h-44 rounded-full overflow-hidden border-4 border-white/20 shadow-2xl">
-    <img
-      src="fid.png"
-      alt="Fidha"
-      className="w-full h-full object-cover"
-      style={{
-        imageRendering: 'high-quality',
-        WebkitFontSmoothing: 'antialiased'
-      }}
+  {/* Holographic Base */}
+  <div className="relative w-44 h-44 mx-auto">
+    {/* Scan Lines */}
+    <div className="absolute inset-0 bg-scanlines rounded-full opacity-20"></div>
+    
+    {/* Main Image */}
+    <div className="absolute inset-0 rounded-full overflow-hidden border-4 border-cyan-500/30 shadow-2xl">
+      <img
+        src="fid.png"
+        alt="Fidha"
+        className="w-full h-full object-cover"
+      />
+      
+      {/* Holographic Overlay */}
+      {/* <motion.div
+        animate={{ 
+          background: [
+            'linear-gradient(45deg, #f97316 0%, transparent 100%)',
+            'linear-gradient(45deg, transparent 0%, #ec4899 100%)',
+            'linear-gradient(45deg, #f97316 0%, transparent 100%)'
+          ]
+        }}
+        transition={{ duration: 3, repeat: Infinity }}
+        className="absolute inset-0 mix-blend-overlay"
+      /> */}
+    </div>
+    
+    {/* Data Rings */}
+    <motion.div
+      animate={{ rotate: 360 }}
+      transition={{ duration: 10, repeat: Infinity }}
+      className="absolute -inset-4 rounded-full border-2 border-cyan-500/30 border-dashed "
     />
+    
+    {/* Holographic Data Points */}
+    {[ '⚡', '⏣', '⌘','⚛️'].map((symbol, i) => (
+      <motion.div
+        key={i}
+        animate={{ 
+          y: [0, -10, 0],
+          opacity: [0.5, 1, 0.5]
+        }}
+        transition={{ duration: 2, delay: i * 0.5, repeat: Infinity }}
+        className="absolute  text-cyan-400 text-xs"
+        style={{
+          top: `${20 + i * 20}%`,
+          left: i % 2 === 0 ? '-15px' : 'auto',
+          right: i % 2 === 1 ? '-15px' : 'auto',
+        }}
+      >
+        {symbol}
+      </motion.div>
+    ))}
   </div>
 </motion.div>
+
+<style jsx>{`
+  .bg-scanlines {
+    background: repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      rgba(0, 255, 255, 0.1) 2px,
+      rgba(0, 255, 255, 0.1) 4px
+    );
+  }
+`}</style>
 
         {/* Name - REDUCED SIZE */}
 <motion.h1 
   initial={{ opacity: 0, y: 50 }}
   animate={{ opacity: 1, y: 0 }}
   transition={{ delay: 0.5 }}
-  className="text-4xl md:text-5xl lg:text-6xl font-bold mb-4" // Changed from text-6xl md:text-7xl
+  className="text-3xl md:text-4xl lg:text-6xl font-bold mb-4" // Changed from text-6xl md:text-7xl
 >
   <span className="bg-gradient-to-r from-orange-500 via-pink-500 to-purple-500 bg-clip-text text-transparent">
     Hi, I'm Fathima Fidha C P
@@ -662,14 +715,14 @@ const navigateToSection = (sectionId) => {
 
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             {[
-              { name: 'React', level: 85, icon: '⚛️', color: 'from-blue-500 to-cyan-500' },
-              { name: 'Tailwind CSS', level: 85, icon: '🌊', color: 'from-blue-600 to-blue-400' },
-              { name: 'Django', level: 75, icon: '🐍', color: 'from-green-500 to-emerald-500' },
-              { name: 'JavaScript', level: 80, icon: '📜', color: 'from-yellow-500 to-amber-500' },
+              { name: 'React', level: 90, icon: '⚛️', color: 'from-blue-500 to-cyan-500' },
+              { name: 'Tailwind CSS', level: 90, icon: '🌊', color: 'from-blue-600 to-blue-400' },
               { name: 'HTML/CSS', level: 90, icon: '🎨', color: 'from-orange-500 to-red-500' },
-              { name: 'Node.js', level: 60, icon: '🟢', color: 'from-green-600 to-green-400' },
-              { name: 'Python', level: 85, icon: '🐍', color: 'from-blue-600 to-blue-400' },
               { name: 'C', level: 85, icon: '⚙️', color: 'from-blue-600 to-blue-400' },
+              { name: 'Python', level: 80, icon: '🐍', color: 'from-blue-600 to-blue-400' },
+              { name: 'JavaScript', level: 80, icon: '📜', color: 'from-yellow-500 to-amber-500' },
+              { name: 'Django', level: 75, icon: '🐍', color: 'from-green-500 to-emerald-500' },
+              { name: 'Node.js', level: 60, icon: '🟢', color: 'from-green-600 to-green-400' },
             ].map((skill, index) => (
               <motion.div
                 key={skill.name}
