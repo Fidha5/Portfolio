@@ -11,133 +11,92 @@ function App() {
     message: ''
   });
   
-  // Add mobile menu state
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  
-  // Form submission states
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
   const [showError, setShowError] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
   const formRef = useRef(null);
 
+  // Scroll detection for navbar
+  useEffect(() => {
+    const handleScroll = () => {
+      setScrolled(window.scrollY > 50);
+    };
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
   // Smooth scroll for anchor links
-  // Smooth scroll for anchor links - UPDATED
-useEffect(() => {
-  const handleAnchorClick = (e) => {
-    const href = e.currentTarget.getAttribute('href');
-    if (href && href.startsWith('#')) {
-      e.preventDefault();
-      const targetId = href.substring(1);
-      const element = document.getElementById(targetId);
-      if (element) {
-        element.scrollIntoView({
-          behavior: 'smooth'
-        });
+  useEffect(() => {
+    const handleAnchorClick = (e) => {
+      const href = e.currentTarget.getAttribute('href');
+      if (href && href.startsWith('#')) {
+        e.preventDefault();
+        const targetId = href.substring(1);
+        const element = document.getElementById(targetId);
+        if (element) {
+          element.scrollIntoView({ behavior: 'smooth' });
+        }
       }
-    }
-  };
+    };
 
-  document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-    anchor.addEventListener('click', handleAnchorClick);
-  });
-
-  return () => {
     document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-      anchor.removeEventListener('click', handleAnchorClick);
+      anchor.addEventListener('click', handleAnchorClick);
     });
-  };
-}, []);
 
-// Navigation helper function
-const navigateToSection = (sectionId) => {
-  console.log(`Navigating to ${sectionId}`);
-  
-  // Close mobile menu
-  setIsMenuOpen(false);
-  
-  // Small delay to ensure menu is closed
-  setTimeout(() => {
-    const element = document.getElementById(sectionId);
-    if (element) {
-      element.scrollIntoView({ 
-        behavior: 'smooth',
-        block: 'start'
+    return () => {
+      document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.removeEventListener('click', handleAnchorClick);
       });
-    } else {
-      console.error(`Section #${sectionId} not found`);
-    }
-  }, 150);
-};
+    };
+  }, []);
 
-  // Close mobile menu when window is resized to desktop
+  // Close mobile menu on resize
   useEffect(() => {
     const handleResize = () => {
       if (window.innerWidth >= 768) {
         setIsMenuOpen(false);
       }
     };
-    
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  // Function to handle resume download
   const handleResumeDownload = () => {
     const resumeUrl = '/resume.pdf';
     const link = document.createElement('a');
     link.href = resumeUrl;
-    link.download = 'Fidha_Resume.pdf';
+    link.download = 'Fathima_Fidha_Resume.pdf';
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
   };
-  
-  // Function to view resume
-  const handleResumeView = () => {
-    window.open("/resume.pdf", "_blank");
-  };
 
-  // Handle form input changes
   const handleInputChange = (e) => {
     const { id, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [id]: value
-    }));
+    setFormData(prev => ({ ...prev, [id]: value }));
   };
 
-  // Handle form submission with Formspree
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
     setShowSuccess(false);
     setShowError(false);
 
-    const formspreeEndpoint = 'https://formspree.io/f/xdawzvzg';
-
     try {
-      const response = await fetch(formspreeEndpoint, {
+      const response = await fetch('https://formspree.io/f/xdawzvzg', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Accept': 'application/json'
         },
-        body: JSON.stringify({
-          name: formData.name,
-          email: formData.email,
-          subject: formData.subject,
-          message: formData.message
-        })
+        body: JSON.stringify(formData)
       });
 
       if (response.ok) {
         setShowSuccess(true);
-        setFormData({
-          name: '',
-          email: '',
-          subject: '',
-          message: ''
-        });
+        setFormData({ name: '', email: '', subject: '', message: '' });
         setTimeout(() => setShowSuccess(false), 5000);
       } else {
         setShowError(true);
@@ -151,564 +110,457 @@ const navigateToSection = (sectionId) => {
     }
   };
 
-  // Social media links
   const socialLinks = {
     instagram: 'https://www.instagram.com/',
     github: 'https://github.com/Fidha5',
     linkedin: 'https://www.linkedin.com/in/fidhacp',
     email: 'mailto:fidfidha07@gmail.com',
     phone: 'tel:+919633452534',
-    location: 'Kerala, India'
+    location: 'Malappuram, Kerala, India'
   };
 
+  const navItems = ['Home', 'About', 'Skills', 'Projects', 'Contact'];
+
   return (
-    <div className="bg-gradient-to-b from-black via-gray-900 to-black text-white scroll-smooth overflow-x-hidden">
+    <div className="bg-[#0a0a0a] text-white antialiased">
       
-      {/* NAVBAR with mobile menu */}
+      {/* NAVBAR */}
       <motion.nav 
         initial={{ y: -100 }}
         animate={{ y: 0 }}
-        transition={{ duration: 0.5 }}
-        className="fixed top-0 w-full bg-black/80 backdrop-blur-md border-b border-gray-800 z-50"
+        transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+        className={`fixed top-0 w-full z-50 transition-all duration-300 ${
+          scrolled 
+            ? 'bg-[#0a0a0a]/90 backdrop-blur-xl border-b border-white/5' 
+            : 'bg-transparent'
+        }`}
       >
-        <div className="max-w-6xl mx-auto flex justify-between items-center px-6 py-4">
+        <div className="max-w-6xl mx-auto flex justify-between items-center px-6 py-5">
           
-          {/* Logo */}
-          <motion.h1 
-            whileHover={{ scale: 1.05 }}
-            className="text-2xl font-bold bg-gradient-to-r from-orange-500 to-pink-500 bg-clip-text text-transparent cursor-pointer"
-            onClick={() => {
-              window.location.hash = '#home';
-              setIsMenuOpen(false);
-            }}
+          <motion.a 
+            href="#home"
+            whileHover={{ opacity: 0.8 }}
+            className="text-lg font-semibold tracking-tight text-white"
           >
-            Fidha
-          </motion.h1>
+            Fidha<span className="text-orange-500">.</span>
+          </motion.a>
 
           {/* Desktop Menu */}
-          <ul className="hidden md:flex gap-8 text-gray-300">
-            {['Home', 'About', 'Skills', 'Projects', 'Contact'].map((item, index) => (
+          <ul className="hidden md:flex items-center gap-10">
+            {navItems.map((item, index) => (
               <motion.li
                 key={item}
-                initial={{ opacity: 0, y: -20 }}
+                initial={{ opacity: 0, y: -10 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: index * 0.1 }}
+                transition={{ delay: index * 0.05 }}
               >
                 <a 
                   href={`#${item.toLowerCase()}`} 
-                  className="relative hover:text-orange-500 transition-colors group"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    document.getElementById(item.toLowerCase())?.scrollIntoView({
-                      behavior: 'smooth'
-                    });
-                  }}
+                  className="text-sm text-gray-400 hover:text-white transition-colors duration-300 tracking-wide"
                 >
                   {item}
-                  <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-orange-500 transition-all group-hover:w-full"></span>
                 </a>
               </motion.li>
             ))}
+            <motion.li
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.3 }}
+            >
+              <a 
+                href="#contact"
+                className="text-sm px-5 py-2 rounded-full border border-white/10 hover:border-orange-500/50 hover:bg-orange-500/10 text-white transition-all duration-300"
+              >
+                Let's Talk
+              </a>
+            </motion.li>
           </ul>
 
           {/* Mobile Menu Button */}
-          <div className="md:hidden flex items-center">
-            <motion.button
-              whileTap={{ scale: 0.95 }}
-              onClick={() => setIsMenuOpen(!isMenuOpen)}
-              className="text-gray-300 hover:text-orange-500 focus:outline-none z-50"
-              aria-label="Toggle menu"
-            >
-              <div className="w-6 h-5 flex flex-col justify-between">
-                <span className={`w-full h-0.5 bg-current transform transition-all duration-300 ${isMenuOpen ? 'rotate-45 translate-y-2' : ''}`}></span>
-                <span className={`w-full h-0.5 bg-current transition-all duration-300 ${isMenuOpen ? 'opacity-0' : ''}`}></span>
-                <span className={`w-full h-0.5 bg-current transform transition-all duration-300 ${isMenuOpen ? '-rotate-45 -translate-y-2' : ''}`}></span>
-              </div>
-            </motion.button>
-          </div>
-        </div>
-{/* Mobile Menu Dropdown - COMPLETELY FIXED */}
-<motion.div
-  initial={false}
-  animate={isMenuOpen ? { height: 'auto', opacity: 1 } : { height: 0, opacity: 0 }}
-  transition={{ duration: 0.3 }}
-  className="md:hidden overflow-hidden bg-black/95 backdrop-blur-md border-t border-gray-800"
->
-  <div className="px-6 py-4 flex flex-col gap-4">
-    {['Home', 'About', 'Skills', 'Projects', 'Contact'].map((item, index) => {
-      const sectionId = item.toLowerCase();
-      return (
-        <motion.div
-          key={item}
-          initial={{ x: -20, opacity: 0 }}
-          animate={isMenuOpen ? { x: 0, opacity: 1 } : { x: -20, opacity: 0 }}
-          transition={{ delay: index * 0.1 }}
-        >
           <button
-            onClick={() => {
-              console.log(`Navigating to ${sectionId}`);
-              // Close menu first
-              setIsMenuOpen(false);
-              
-              // Small delay to allow menu to close before scrolling
-              setTimeout(() => {
-                const element = document.getElementById(sectionId);
-                if (element) {
-                  element.scrollIntoView({ 
-                    behavior: 'smooth',
-                    block: 'start'
-                  });
-                } else {
-                  console.error(`Element #${sectionId} not found`);
-                }
-              }, 100);
-            }}
-            className="w-full text-left text-gray-300 hover:text-orange-500 py-3 text-lg font-medium border-b border-gray-800 last:border-0 transition-colors bg-transparent border-none cursor-pointer"
+            onClick={() => setIsMenuOpen(!isMenuOpen)}
+            className="md:hidden text-white p-2"
+            aria-label="Toggle menu"
           >
-            {item}
+            <div className="w-6 h-4 flex flex-col justify-between">
+              <span className={`w-full h-px bg-white transition-all duration-300 ${isMenuOpen ? 'rotate-45 translate-y-[7px]' : ''}`}></span>
+              <span className={`w-full h-px bg-white transition-all duration-300 ${isMenuOpen ? 'opacity-0' : ''}`}></span>
+              <span className={`w-full h-px bg-white transition-all duration-300 ${isMenuOpen ? '-rotate-45 -translate-y-[7px]' : ''}`}></span>
+            </div>
           </button>
+        </div>
+
+        {/* Mobile Menu */}
+        <motion.div
+          initial={false}
+          animate={isMenuOpen ? { height: 'auto', opacity: 1 } : { height: 0, opacity: 0 }}
+          transition={{ duration: 0.3 }}
+          className="md:hidden overflow-hidden bg-[#0a0a0a]/95 backdrop-blur-xl border-t border-white/5"
+        >
+          <div className="px-6 py-6 flex flex-col gap-1">
+            {navItems.map((item, index) => {
+              const sectionId = item.toLowerCase();
+              return (
+                <motion.button
+                  key={item}
+                  initial={{ x: -20, opacity: 0 }}
+                  animate={isMenuOpen ? { x: 0, opacity: 1 } : { x: -20, opacity: 0 }}
+                  transition={{ delay: index * 0.05 }}
+                  onClick={() => {
+                    setIsMenuOpen(false);
+                    setTimeout(() => {
+                      document.getElementById(sectionId)?.scrollIntoView({ behavior: 'smooth' });
+                    }, 100);
+                  }}
+                  className="text-left text-gray-400 hover:text-white py-3 text-base transition-colors"
+                >
+                  {item}
+                </motion.button>
+              );
+            })}
+            
+            <div className="flex gap-6 pt-4 mt-2 border-t border-white/5">
+              {[
+                { icon: FiInstagram, link: socialLinks.instagram },
+                { icon: FiGithub, link: socialLinks.github },
+                { icon: FiLinkedin, link: socialLinks.linkedin },
+              ].map((social, i) => (
+                <a
+                  key={i}
+                  href={social.link}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-gray-500 hover:text-orange-500 transition-colors"
+                >
+                  <social.icon size={18} />
+                </a>
+              ))}
+            </div>
+          </div>
         </motion.div>
-      );
-    })}
-    
-    {/* Mobile menu social icons */}
-    <div className="flex gap-4 pt-2">
-      <a
-        href={socialLinks.instagram}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="text-gray-400 hover:text-orange-500 transition-colors p-2 hover:scale-110 transform duration-200"
-        onClick={() => setIsMenuOpen(false)}
-      >
-        <FiInstagram size={20} />
-      </a>
-      <a
-        href={socialLinks.github}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="text-gray-400 hover:text-orange-500 transition-colors p-2 hover:scale-110 transform duration-200"
-        onClick={() => setIsMenuOpen(false)}
-      >
-        <FiGithub size={20} />
-      </a>
-      <a
-        href={socialLinks.linkedin}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="text-gray-400 hover:text-orange-500 transition-colors p-2 hover:scale-110 transform duration-200"
-        onClick={() => setIsMenuOpen(false)}
-      >
-        <FiLinkedin size={20} />
-      </a>
-    </div>
-  </div>
-</motion.div>  </motion.nav>
+      </motion.nav>
 
       {/* HERO SECTION */}
-<section id="home" className="min-h-screen flex flex-col items-center justify-center text-center px-6 relative overflow-hidden">
-  
-  {/* Animated background circles */}
-  <div className="absolute inset-0 overflow-hidden">
-    <motion.div 
-      animate={{ 
-        scale: [1, 1.2, 1],
-        opacity: [0.3, 0.5, 0.3],
-      }}
-      transition={{ duration: 8, repeat: Infinity }}
-      className="absolute -top-20 -right-20 w-64 h-64 bg-orange-500 rounded-full blur-3xl opacity-20"
-    />
-    <motion.div 
-      animate={{ 
-        scale: [1, 1.3, 1],
-        opacity: [0.2, 0.4, 0.2],
-      }}
-      transition={{ duration: 10, repeat: Infinity }}
-      className="absolute -bottom-20 -left-20 w-64 h-64 bg-pink-500 rounded-full blur-3xl opacity-20"
-    />
-  </div>
-
-  {/* Profile Image - Holographic */}
-  <motion.div
-    initial={{ scale: 0, rotate: -180 }}
-    animate={{ scale: 1, rotate: 0 }}
-    transition={{ type: "spring", duration: 1.5 }}
-    className="relative mb-8 group"
-  >
-    {/* Holographic Base */}
-    <div className="relative w-44 h-44 mx-auto">
-      {/* Scan Lines */}
-      <div className="absolute inset-0 bg-scanlines rounded-full opacity-20"></div>
-      
-      {/* Main Image */}
-      <div className="absolute inset-0 rounded-full overflow-hidden border-4 border-cyan-500/30 shadow-2xl">
-        <img
-          src="fid.png"
-          alt="Fidha"
-          className="w-full h-full object-cover"
-        />
-      </div>
-      
-      {/* Holographic Data Points */}
-      {[ '⚡', '⏣', '⌘','⚛️'].map((symbol, i) => (
-        <motion.div
-          key={i}
-          animate={{ 
-            y: [0, -10, 0],
-            opacity: [0.5, 1, 0.5]
-          }}
-          transition={{ duration: 2, delay: i * 0.5, repeat: Infinity }}
-          className="absolute text-cyan-400 text-xs"
-          style={{
-            top: `${20 + i * 20}%`,
-            left: i % 2 === 0 ? '-15px' : 'auto',
-            right: i % 2 === 1 ? '-15px' : 'auto',
-          }}
-        >
-          {symbol}
-        </motion.div>
-      ))}
-    </div>
-  </motion.div>
-
-  <style jsx>{`
-    .bg-scanlines {
-      background: repeating-linear-gradient(
-        0deg,
-        transparent,
-        transparent 2px,
-        rgba(0, 255, 255, 0.1) 2px,
-        rgba(0, 255, 255, 0.1) 4px
-      );
-    }
-  `}</style>
-
-  {/* Name */}
-  <motion.h1 
-    initial={{ opacity: 0, y: 50 }}
-    animate={{ opacity: 1, y: 0 }}
-    transition={{ delay: 0.5 }}
-    className="text-2xl md:text-4xl lg:text-6xl font-bold mb-4"
-  >
-    <span className="bg-gradient-to-r from-orange-500 via-pink-500 to-purple-500 bg-clip-text text-transparent">
-      Hi, I'm Fathima Fidha C P
-    </span>
-  </motion.h1>
-
-  {/* Role with TypeWriter */}
-  <motion.h2 
-    initial={{ opacity: 0 }}
-    animate={{ opacity: 1 }}
-    transition={{ delay: 1 }}
-    className="text-2xl md:text-3xl text-gray-400 mb-8"
-  >
-    <TypeWriter text="Frontend Developer" speed={80} />
-  </motion.h2>
-
-  {/* Buttons */}
-  <motion.div 
-    initial={{ opacity: 0, y: 50 }}
-    animate={{ opacity: 1, y: 0 }}
-    transition={{ delay: 1.5 }}
-    className="flex gap-6 flex-wrap justify-center relative z-30"
-  >
-    <motion.a
-      whileHover={{ scale: 1.05 }}
-      whileTap={{ scale: 0.95 }}
-      href="#projects"
-      className="relative px-8 py-3 rounded-full bg-gradient-to-r from-orange-500 to-pink-500 text-white font-semibold overflow-hidden group z-30"
-      onClick={(e) => {
-        e.preventDefault();
-        document.getElementById('projects')?.scrollIntoView({
-          behavior: 'smooth'
-        });
-      }}
-    >
-      <span className="relative z-10">View Projects</span>
-      <motion.div 
-        className="absolute inset-0 bg-gradient-to-r from-pink-500 to-orange-500"
-        initial={{ x: '100%' }}
-        whileHover={{ x: 0 }}
-        transition={{ duration: 0.3 }}
-      />
-    </motion.a>
-
-    {/* Resume Button */}
-    <motion.button
-      whileHover={{ scale: 1.05 }}
-      whileTap={{ scale: 0.95 }}
-      onClick={() => {
-        console.log('Resume button clicked');
-        window.open('/resume.pdf', '_blank');
-      }}
-      className="px-8 py-3 rounded-full border-2 border-orange-500 text-orange-500 font-semibold hover:bg-orange-500 hover:text-white transition-all duration-300 flex items-center gap-2 z-30 relative cursor-pointer"
-      style={{ pointerEvents: 'auto' }}
-    >
-      <FiExternalLink size={18} />
-      View Resume
-    </motion.button>
-  </motion.div>
-
-  {/* Social icons */}
-  <motion.div 
-    initial={{ opacity: 0 }}
-    animate={{ opacity: 1 }}
-    transition={{ delay: 2 }}
-    className="absolute bottom-10 left-1/2 transform -translate-x-1/2 flex gap-4"
-  >
-    <motion.a
-      whileHover={{ y: -5 }}
-      href={socialLinks.instagram}
-      target="_blank"
-      rel="noopener noreferrer"
-      className="text-gray-400 hover:text-orange-500 transition-colors"
-    >
-      <FiInstagram size={24} />
-    </motion.a>
-    <motion.a
-      whileHover={{ y: -5 }}
-      href={socialLinks.github}
-      target="_blank"
-      rel="noopener noreferrer"
-      className="text-gray-400 hover:text-orange-500 transition-colors"
-    >
-      <FiGithub size={24} />
-    </motion.a>
-    <motion.a
-      whileHover={{ y: -5 }}
-      href={socialLinks.linkedin}
-      target="_blank"
-      rel="noopener noreferrer"
-      className="text-gray-400 hover:text-orange-500 transition-colors"
-    >
-      <FiLinkedin size={24} />
-    </motion.a>
-    <motion.a
-      whileHover={{ y: -5 }}
-      href={socialLinks.email}
-      className="text-gray-400 hover:text-orange-500 transition-colors"
-    >
-      <FiMail size={24} />
-    </motion.a>
-  </motion.div>
-</section>
-    {/* ABOUT SECTION */}
-<section id="about" className="py-24 px-10 relative bg-gradient-to-b from-black via-gray-900 to-black">
-  <div className="max-w-6xl mx-auto">
-    <motion.div
-      initial={{ opacity: 0, y: 100 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.8 }}
-      viewport={{ once: true }}
-      className="grid md:grid-cols-2 gap-12 lg:gap-16 items-center"
-    >
-      {/* Image Column with Circular Design */}
-      <motion.div
-        initial={{ opacity: 0, x: -50 }}
-        whileInView={{ opacity: 1, x: 0 }}
-        transition={{ duration: 0.8 }}
-        viewport={{ once: true }}
-        className="relative group flex justify-center"
-      >
-        {/* Particle Effects */}
+      <section id="home" className="min-h-screen flex items-center justify-center relative px-6">
+        
+        {/* Subtle Background */}
         <div className="absolute inset-0 overflow-hidden">
-          {[...Array(8)].map((_, i) => (
-            <motion.div
-              key={i}
-              animate={{
-                x: [Math.random() * 150 - 75, Math.random() * 150 - 75],
-                y: [Math.random() * 150 - 75, Math.random() * 150 - 75],
-                scale: [0, 1, 0],
-                opacity: [0, 1, 0]
-              }}
-              transition={{
-                duration: Math.random() * 3 + 2,
-                repeat: Infinity,
-                delay: Math.random() * 2
-              }}
-              className="absolute w-1 h-1 bg-orange-500 rounded-full"
-              style={{
-                left: `${Math.random() * 100}%`,
-                top: `${Math.random() * 100}%`
-              }}
-            />
-          ))}
+          <div className="absolute top-1/4 -left-1/4 w-96 h-96 bg-orange-500/5 rounded-full blur-[120px]"></div>
+          <div className="absolute bottom-1/4 -right-1/4 w-96 h-96 bg-pink-500/5 rounded-full blur-[120px]"></div>
         </div>
-        
-        {/* Main Image Card - Circular */}
-        <motion.div
-          whileHover={{ scale: 1.05 }}
-          transition={{ type: "spring", stiffness: 300 }}
-          className="relative z-10 w-64 h-64 md:w-72 md:h-72"
-        >
-          {/* Glow Effect */}
-          <motion.div 
-            animate={{ scale: [1, 1.1, 1] }}
-            transition={{ duration: 3, repeat: Infinity }}
-            className="absolute inset-0 bg-gradient-to-r from-orange-500 to-pink-500 rounded-full blur-xl opacity-40 group-hover:opacity-70 transition-opacity"
-          ></motion.div>
-          
-          {/* Image Container */}
-          <div className="relative w-full h-full rounded-full overflow-hidden border-4 border-white/20 shadow-2xl">
-            <img
-              src="fid.png"
-              alt="Fidha"
-              className="w-full h-full object-cover"
-            />
+
+        <div className="max-w-6xl mx-auto w-full relative z-10">
+          <div className="grid lg:grid-cols-12 gap-12 items-center">
             
-            {/* Gradient Border */}
-            <div className="absolute inset-0 rounded-full border-4 border-transparent group-hover:border-orange-500/50 transition-all duration-300"></div>
-            
-            {/* Bottom Gradient */}
-            <div className="absolute bottom-0 left-0 right-0 h-20 bg-gradient-to-t from-black/80 via-black/40 to-transparent rounded-b-full"></div>
-          </div>
-        </motion.div>
-        
-        {/* Floating Tech Icons */}
-        {/* <motion.div
-          animate={{ y: [0, -10, 0], rotate: [0, 10, 0] }}
-          transition={{ duration: 3, repeat: Infinity }}
-          className="absolute -top-2 -right-2 w-10 h-10 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-full flex items-center justify-center text-white text-xl shadow-xl z-20"
-        >
-          ⚛️
-        </motion.div>
-        
-        <motion.div
-          animate={{ y: [0, 10, 0], rotate: [0, -10, 0] }}
-          transition={{ duration: 4, repeat: Infinity, delay: 1 }}
-          className="absolute -bottom-2 -left-2 w-10 h-10 bg-gradient-to-br from-green-500 to-emerald-500 rounded-full flex items-center justify-center text-white text-xl shadow-xl z-20"
-        >
-          📦
-        </motion.div> */}
-
-        {/* Additional Floating Elements */}
-        <motion.div
-          animate={{ scale: [1, 1.2, 1], opacity: [0.3, 0.6, 0.3] }}
-          transition={{ duration: 4, repeat: Infinity }}
-          className="absolute -top-6 -left-2 w-16 h-16 bg-orange-500/10 rounded-full blur-md"
-        ></motion.div>
-        
-        <motion.div
-          animate={{ scale: [1, 1.3, 1], opacity: [0.2, 0.5, 0.2] }}
-          transition={{ duration: 5, repeat: Infinity, delay: 1.5 }}
-          className="absolute -bottom-6 -right-2 w-20 h-20 bg-pink-500/10 rounded-full blur-md"
-        ></motion.div>
-      </motion.div>
-
-      {/* Text Column */}
-      <div>
-        <motion.h2 
-          initial={{ opacity: 0, x: -50 }}
-          whileInView={{ opacity: 1, x: 0 }}
-          transition={{ delay: 0.2 }}
-          viewport={{ once: true }}
-          className="text-4xl md:text-5xl font-bold mb-6"
-        >
-          About <span className="bg-gradient-to-r from-orange-500 to-pink-500 bg-clip-text text-transparent">Me</span>
-        </motion.h2>
-
-        <motion.p 
-          initial={{ opacity: 0, x: -50 }}
-          whileInView={{ opacity: 1, x: 0 }}
-          transition={{ delay: 0.4 }}
-          viewport={{ once: true }}
-          className="text-gray-400 text-lg leading-relaxed mb-4"
-        >
-          I am a passionate Frontend Developer who enjoys creating clean, responsive, and user-friendly web interfaces. I mainly work with React to build modern and interactive web applications.
-        </motion.p>
-        
-        <motion.p 
-          initial={{ opacity: 0, x: -50 }}
-          whileInView={{ opacity: 1, x: 0 }}
-          transition={{ delay: 0.6 }}
-          viewport={{ once: true }}
-          className="text-gray-400 text-lg leading-relaxed mb-4"
-        >
-          I love transforming ideas into visually appealing and intuitive digital experiences while focusing on performance, accessibility, and usability.
-        </motion.p>
-        
-        <motion.p 
-          initial={{ opacity: 0, x: -50 }}
-          whileInView={{ opacity: 1, x: 0 }}
-          transition={{ delay: 0.8 }}
-          viewport={{ once: true }}
-          className="text-gray-400 text-lg leading-relaxed"
-        >
-          As a developer, I am always eager to learn new technologies and improve my skills to create better and more engaging user experiences.
-        </motion.p>
-        {/* Stats Section */}
-        {/* <motion.div 
-          initial={{ opacity: 0, y: 50 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ delay: 1 }}
-          viewport={{ once: true }}
-          className="grid grid-cols-3 gap-4 mt-8"
-        >
-          {[
-            { number: '2+', label: 'Years', icon: '⏳' },
-            { number: '2+', label: 'Projects', icon: '🚀' },
-            { number: '5+', label: 'Technologies', icon: '💻' }
-          ].map((stat, index) => (
-            <motion.div 
-              key={index} 
-              whileHover={{ y: -5 }}
-              className="text-center p-4 bg-gray-800/50 backdrop-blur-sm rounded-xl border border-gray-700 hover:border-orange-500/50 transition-all"
+            {/* Text Content */}
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
+              className="lg:col-span-7 text-center lg:text-left"
             >
-              <div className="text-2xl mb-1">{stat.icon}</div>
-              <div className="text-2xl font-bold text-orange-500">{stat.number}</div>
-              <div className="text-xs text-gray-500">{stat.label}</div>
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.3 }}
+                className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-white/10 bg-white/5 text-xs text-gray-400 mb-8"
+              >
+                <span className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse"></span>
+                Available for opportunities
+              </motion.div>
+
+              <motion.h1
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.4, duration: 0.8 }}
+                className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight mb-6 leading-[1.1]"
+              >
+                Hi, I'm{' '}
+                <span className="bg-gradient-to-r from-orange-400 to-pink-500 bg-clip-text text-transparent">
+                  Fathima Fidha
+                </span>
+              </motion.h1>
+
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.6 }}
+                className="text-lg sm:text-xl text-gray-400 mb-8 h-8"
+              >
+                <TypeWriter text="Frontend Developer" speed={80} />
+              </motion.div>
+
+              <motion.p
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.7 }}
+                className="text-gray-500 text-base leading-relaxed mb-10 max-w-lg mx-auto lg:mx-0"
+              >
+                Crafting clean, responsive, and user-focused web experiences with modern technologies. 
+                Turning ideas into elegant digital solutions.
+              </motion.p>
+
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.9 }}
+                className="flex flex-wrap gap-4 justify-center lg:justify-start mb-12"
+              >
+                <a
+                  href="#projects"
+                  className="group px-7 py-3 bg-white text-black text-sm font-medium rounded-full hover:bg-gray-200 transition-all duration-300 flex items-center gap-2"
+                >
+                  View Work
+                  <span className="group-hover:translate-x-1 transition-transform">→</span>
+                </a>
+
+                <button
+                  onClick={handleResumeDownload}
+                  className="px-7 py-3 border border-white/10 text-gray-300 text-sm font-medium rounded-full hover:border-white/30 hover:text-white transition-all duration-300 flex items-center gap-2"
+                >
+                  <FiDownload size={16} />
+                  Resume
+                </button>
+              </motion.div>
+
+              {/* Social Links */}
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 1.1 }}
+                className="flex gap-5 justify-center lg:justify-start"
+              >
+                {[
+                  { icon: FiGithub, link: socialLinks.github, label: 'GitHub' },
+                  { icon: FiLinkedin, link: socialLinks.linkedin, label: 'LinkedIn' },
+                  { icon: FiInstagram, link: socialLinks.instagram, label: 'Instagram' },
+                  { icon: FiMail, link: socialLinks.email, label: 'Email' },
+                ].map((social, i) => (
+                  <motion.a
+                    key={i}
+                    href={social.link}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    whileHover={{ y: -3 }}
+                    className="text-gray-600 hover:text-white transition-colors duration-300"
+                    aria-label={social.label}
+                  >
+                    <social.icon size={20} />
+                  </motion.a>
+                ))}
+              </motion.div>
             </motion.div>
-          ))}
-        </motion.div> */}
-      </div>
-    </motion.div>
-  </div>
-</section>
-      {/* SKILLS SECTION */}
-      <section id="skills" className="py-16 px-10 bg-gradient-to-b from-black via-gray-900 to-black">
+
+            {/* Profile Image */}
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ delay: 0.5, duration: 0.8 }}
+              className="lg:col-span-5 flex justify-center lg:justify-end"
+            >
+              <div className="relative">
+                {/* Subtle glow */}
+                <div className="absolute -inset-4 bg-gradient-to-r from-orange-500/20 to-pink-500/20 rounded-full blur-3xl"></div>
+                
+                {/* Image */}
+                <div className="relative w-64 h-64 sm:w-72 sm:h-72 rounded-full overflow-hidden border border-white/10">
+                  <img
+                    src="fid.png"
+                    alt="Fathima Fidha"
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+
+                {/* Decorative dots */}
+                <motion.div
+                  animate={{ y: [0, -8, 0] }}
+                  transition={{ duration: 4, repeat: Infinity }}
+                  className="absolute -top-2 -right-2 w-3 h-3 bg-orange-500 rounded-full"
+                />
+                <motion.div
+                  animate={{ y: [0, 8, 0] }}
+                  transition={{ duration: 5, repeat: Infinity, delay: 1 }}
+                  className="absolute -bottom-2 -left-2 w-2 h-2 bg-pink-500 rounded-full"
+                />
+              </div>
+            </motion.div>
+          </div>
+        </div>
+
+        {/* Scroll indicator */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 1.5 }}
+          className="absolute bottom-10 left-1/2 -translate-x-1/2 hidden lg:flex flex-col items-center gap-2"
+        >
+          <span className="text-[10px] text-gray-600 tracking-widest uppercase">Scroll</span>
+          <div className="w-px h-8 bg-gradient-to-b from-gray-600 to-transparent"></div>
+        </motion.div>
+      </section>
+
+      {/* ABOUT SECTION */}
+      <section id="about" className="py-32 px-6 relative">
         <div className="max-w-6xl mx-auto">
-          <motion.h2 
-            initial={{ opacity: 0, y: 50 }}
+          
+          {/* Section Label */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            viewport={{ once: true }}
+            className="flex items-center gap-4 mb-16"
+          >
+            <span className="text-xs text-orange-500 tracking-widest uppercase">01</span>
+            <div className="h-px flex-1 bg-white/5 max-w-[60px]"></div>
+            <span className="text-xs text-gray-600 tracking-widest uppercase">About</span>
+          </motion.div>
+
+          <div className="grid lg:grid-cols-2 gap-16 lg:gap-24 items-start">
+            
+            {/* Left - Text */}
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.8 }}
+            >
+              <h2 className="text-3xl sm:text-4xl font-bold tracking-tight mb-8 leading-tight">
+                A developer who cares about
+                <span className="text-gray-500"> the details.</span>
+              </h2>
+
+              <div className="space-y-5 text-gray-400 leading-relaxed">
+                <p>
+                  I'm a passionate Frontend Developer who enjoys creating clean, responsive, 
+                  and user-friendly web interfaces. I mainly work with React to build modern 
+                  and interactive web applications.
+                </p>
+                <p>
+                  I love transforming ideas into visually appealing and intuitive digital 
+                  experiences while focusing on performance, accessibility, and usability.
+                </p>
+                <p>
+                  As a developer, I'm always eager to learn new technologies and improve 
+                  my skills to create better and more engaging user experiences.
+                </p>
+              </div>
+
+              {/* Stats */}
+              <div className="grid grid-cols-3 gap-8 mt-12 pt-8 border-t border-white/5">
+                {[
+                  { number: '2+', label: 'Years Experience' },
+                  { number: '3+', label: 'Projects Built' },
+                  { number: '5+', label: 'Technologies' }
+                ].map((stat, i) => (
+                  <motion.div
+                    key={i}
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ delay: 0.2 + i * 0.1 }}
+                  >
+                    <div className="text-2xl sm:text-3xl font-bold text-white mb-1">{stat.number}</div>
+                    <div className="text-xs text-gray-600 tracking-wide">{stat.label}</div>
+                  </motion.div>
+                ))}
+              </div>
+            </motion.div>
+
+            {/* Right - Image */}
+            <motion.div
+              initial={{ opacity: 0, x: 30 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.8 }}
+              className="relative"
+            >
+              <div className="relative aspect-[4/5] max-w-sm mx-auto lg:mx-0 lg:ml-auto">
+                {/* Frame decoration */}
+                <div className="absolute -inset-3 border border-white/5 rounded-2xl"></div>
+                
+                {/* Image */}
+                <div className="relative w-full h-full rounded-2xl overflow-hidden border border-white/10">
+                  <img
+                    src="fid.png"
+                    alt="Fathima Fidha"
+                    className="w-full h-full object-cover"
+                  />
+                  {/* Subtle gradient overlay */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent"></div>
+                </div>
+
+                {/* Floating tag */}
+                <motion.div
+                  animate={{ y: [0, -6, 0] }}
+                  transition={{ duration: 4, repeat: Infinity }}
+                  className="absolute -bottom-4 -left-4 bg-[#0a0a0a] border border-white/10 rounded-xl px-4 py-3 backdrop-blur-sm"
+                >
+                  <div className="text-xs text-gray-500 mb-1">Based in</div>
+                  <div className="text-sm font-medium text-white">Kerala, India</div>
+                </motion.div>
+              </div>
+            </motion.div>
+          </div>
+        </div>
+      </section>
+
+      {/* SKILLS SECTION */}
+      <section id="skills" className="py-32 px-6 relative">
+        <div className="max-w-6xl mx-auto">
+          
+          <motion.div
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            viewport={{ once: true }}
+            className="flex items-center gap-4 mb-16"
+          >
+            <span className="text-xs text-orange-500 tracking-widest uppercase">02</span>
+            <div className="h-px flex-1 bg-white/5 max-w-[60px]"></div>
+            <span className="text-xs text-gray-600 tracking-widest uppercase">Skills</span>
+          </motion.div>
+
+          <motion.h2
+            initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="text-4xl md:text-5xl font-bold text-center mb-16"
+            className="text-3xl sm:text-4xl font-bold tracking-tight mb-16 max-w-2xl"
           >
-            My <span className="bg-gradient-to-r from-orange-500 to-pink-500 bg-clip-text text-transparent">Skills</span>
+            Technologies I work with
           </motion.h2>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-x-12 gap-y-8">
             {[
-              { name: 'React', level: 90, icon: '⚛️', color: 'from-blue-500 to-cyan-500' },
-              { name: 'Tailwind CSS', level: 90, icon: '🌊', color: 'from-blue-600 to-blue-400' },
-              { name: 'HTML/CSS', level: 90, icon: '🎨', color: 'from-orange-500 to-red-500' },
-              { name: 'C', level: 85, icon: '⚙️', color: 'from-blue-600 to-blue-400' },
-              { name: 'Python', level: 80, icon: ' 🔷 ', color: 'from-blue-600 to-blue-400' },
-              { name: 'JavaScript', level: 80, icon: '📜', color: 'from-yellow-500 to-amber-500' },
-              { name: 'Django', level: 75, icon: '📦', color: 'from-green-500 to-emerald-500' },
+              { name: 'React', level: 90 },
+              { name: 'Tailwind CSS', level: 90 },
+              { name: 'HTML/CSS', level: 90 },
+              { name: 'C', level: 85 },
+              { name: 'Python', level: 80 },
+              { name: 'JavaScript', level: 80 },
+              { name: 'Django', level: 75 },
             ].map((skill, index) => (
               <motion.div
                 key={skill.name}
-                initial={{ opacity: 0, scale: 0.8 }}
-                whileInView={{ opacity: 1, scale: 1 }}
-                transition={{ delay: index * 0.1 }}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
-                whileHover={{ y: -10 }}
-                className="bg-gray-800/50 backdrop-blur-sm p-6 rounded-xl border border-gray-700 hover:border-orange-500 transition-all"
+                transition={{ delay: index * 0.05 }}
+                className="group"
               >
-                <div className="flex items-center gap-3 mb-4">
-                  <span className="text-3xl">{skill.icon}</span>
-                  <h3 className="text-xl font-semibold">{skill.name}</h3>
+                <div className="flex items-center justify-between mb-3">
+                  <span className="text-sm font-medium text-gray-300 group-hover:text-white transition-colors">
+                    {skill.name}
+                  </span>
+                  <span className="text-xs text-gray-600">{skill.level}%</span>
                 </div>
-                
-                <div className="relative h-3 bg-gray-700 rounded-full overflow-hidden">
+                <div className="h-px bg-white/5 relative overflow-hidden">
                   <motion.div
                     initial={{ width: 0 }}
                     whileInView={{ width: `${skill.level}%` }}
-                    transition={{ duration: 1, delay: 0.5 }}
                     viewport={{ once: true }}
-                    className={`absolute h-full rounded-full bg-gradient-to-r ${skill.color}`}
+                    transition={{ duration: 1.2, delay: 0.3 + index * 0.05, ease: [0.22, 1, 0.36, 1] }}
+                    className="absolute top-0 left-0 h-full bg-gradient-to-r from-orange-500 to-pink-500"
                   />
                 </div>
-                <p className="text-right mt-2 text-sm text-gray-400">{skill.level}%</p>
               </motion.div>
             ))}
           </div>
@@ -716,187 +568,138 @@ const navigateToSection = (sectionId) => {
       </section>
 
       {/* PROJECTS SECTION */}
-      <section id="projects" className="py-20 px-10">
+      <section id="projects" className="py-32 px-6 relative">
         <div className="max-w-6xl mx-auto">
-          <motion.h2 
-            initial={{ opacity: 0, y: 50 }}
+          
+          <motion.div
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            viewport={{ once: true }}
+            className="flex items-center gap-4 mb-16"
+          >
+            <span className="text-xs text-orange-500 tracking-widest uppercase">03</span>
+            <div className="h-px flex-1 bg-white/5 max-w-[60px]"></div>
+            <span className="text-xs text-gray-600 tracking-widest uppercase">Projects</span>
+          </motion.div>
+
+          <motion.h2
+            initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="text-4xl md:text-5xl font-bold text-center mb-16"
+            className="text-3xl sm:text-4xl font-bold tracking-tight mb-16 max-w-2xl"
           >
-            <span className="bg-gradient-to-r from-orange-500 to-pink-500 bg-clip-text text-transparent">Projects</span>
+            Selected work
           </motion.h2>
 
-          <div className="grid md:grid-cols-3 gap-8">
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             {[
               {
                 title: 'Lurnzo',
                 desc: 'AI-based technology learning platform for coding education.',
-                tech: ['Python', 'Django', 'mySQL'],
-                icon: '🤖',
+                tech: ['Python', 'Django', 'MySQL'],
                 image: 'lurnzo.jpeg',
                 github: 'https://github.com/Fidha5/Lurnzo',
-                live: 'https://lurnnzo-demo.com',
-                hasLive: false
+                live: null,
               },
               {
                 title: 'AttenDo',
-                desc: 'Smart attendance system with faculty dashboard and parent notifications.',
+                desc: 'Smart attendance system with faculty dashboard and notifications.',
                 tech: ['React', 'Django', 'SQLite'],
-                icon: '📊',
                 image: 'attendo.jpeg',
                 github: 'https://github.com/Sameeha6/ATTENDO',
-                live: 'https://attendance-system-demo.com',
-                hasLive: false
+                live: null,
               },
               {
                 title: 'E-App',
-                desc: 'E-commerce platform with product listing, cart, and order system.',
-                tech: ['React', 'Json'],
-                icon: '🛒',
+                desc: 'E-commerce platform with product listing, cart, and orders.',
+                tech: ['React', 'JSON'],
                 image: 'image.png',
                 github: 'https://github.com/Fidha5/E-App',
                 live: 'e-app.mp4',
-                hasLive: true
               },
             ].map((project, index) => (
               <motion.div
                 key={project.title}
-                initial={{ opacity: 0, y: 50 }}
+                initial={{ opacity: 0, y: 30 }}
                 whileInView={{ opacity: 1, y: 0 }}
-                transition={{ delay: index * 0.2 }}
                 viewport={{ once: true }}
-                whileHover={{ 
-                  scale: 1.05,
-                  rotateY: 5,
-                  boxShadow: "0 20px 40px rgba(249, 115, 22, 0.3)"
-                }}
-                className="group relative bg-gradient-to-br from-gray-900 to-black rounded-2xl border border-gray-800 hover:border-orange-500 transition-all overflow-hidden"
+                transition={{ delay: index * 0.1, duration: 0.6 }}
+                className="group"
               >
-                <div className="absolute inset-0 bg-gradient-to-r from-orange-500/10 to-pink-500/10 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                
-                {/* Project Image */}
-                <div className="relative h-48 w-full overflow-hidden">
+                {/* Image */}
+                <div className="relative aspect-[4/3] rounded-xl overflow-hidden border border-white/5 mb-5 bg-gray-900">
                   <img 
                     src={project.image} 
                     alt={project.title}
-                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-gray-900 via-gray-900/50 to-transparent"></div>
                   
-                  {/* Icon overlay on image */}
-                  <div className="absolute top-3 right-3 w-10 h-10 bg-black/50 backdrop-blur-sm rounded-full flex items-center justify-center text-2xl border border-white/20">
-                    {project.icon}
-                  </div>
-
-                  {/* Hover Overlay with Icons */}
-                  <motion.div 
-                    initial={{ opacity: 0 }}
-                    whileHover={{ opacity: 1 }}
-                    className="absolute inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center gap-6"
-                  >
+                  {/* Overlay */}
+                  <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center gap-4">
                     <motion.a
                       href={project.github}
                       target="_blank"
                       rel="noopener noreferrer"
-                      whileHover={{ scale: 1.2, y: -5 }}
-                      className="bg-orange-500 p-3 rounded-full text-white shadow-lg"
+                      whileHover={{ scale: 1.1 }}
+                      whileTap={{ scale: 0.95 }}
+                      className="p-3 bg-white text-black rounded-full"
                       onClick={(e) => e.stopPropagation()}
                     >
-                      <FiGithub size={24} />
+                      <FiGithub size={18} />
                     </motion.a>
-
-                    {project.hasLive ? (
+                    
+                    {project.live ? (
                       <motion.a
                         href={project.live}
                         target="_blank"
                         rel="noopener noreferrer"
-                        whileHover={{ scale: 1.2, y: -5 }}
-                        className="bg-pink-500 p-3 rounded-full text-white shadow-lg"
+                        whileHover={{ scale: 1.1 }}
+                        whileTap={{ scale: 0.95 }}
+                        className="p-3 bg-orange-500 text-white rounded-full"
                         onClick={(e) => e.stopPropagation()}
                       >
-                        <FiExternalLink size={24} />
+                        <FiExternalLink size={18} />
                       </motion.a>
                     ) : (
-                      <motion.div
-                        whileHover={{ scale: 1.1 }}
-                        className="relative group/tooltip"
-                      >
-                        <div className="bg-gray-600 p-3 rounded-full text-white shadow-lg cursor-not-allowed opacity-75">
-                          <FiExternalLink size={24} />
-                        </div>
-                        <div className="absolute -bottom-12 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white text-xs px-3 py-1 rounded-full whitespace-nowrap opacity-0 group-hover/tooltip:opacity-100 transition-opacity">
-                          Demo coming soon
-                        </div>
-                      </motion.div>
+                      <div className="p-3 bg-white/10 text-gray-500 rounded-full cursor-not-allowed relative group/tip">
+                        <FiExternalLink size={18} />
+                        <span className="absolute -bottom-8 left-1/2 -translate-x-1/2 text-[10px] text-gray-400 bg-black/80 px-2 py-1 rounded whitespace-nowrap opacity-0 group-hover/tip:opacity-100 transition-opacity">
+                          Coming soon
+                        </span>
+                      </div>
                     )}
-                  </motion.div>
+                  </div>
                 </div>
-                
+
                 {/* Content */}
-                <div className="relative p-6">
-                  <h3 className="text-2xl font-bold mb-3 group-hover:text-orange-500 transition-colors">
-                    {project.title}
-                  </h3>
-                  <p className="text-gray-400 mb-4">
+                <div className="space-y-3">
+                  <div className="flex items-start justify-between gap-4">
+                    <h3 className="text-lg font-semibold text-white group-hover:text-orange-400 transition-colors">
+                      {project.title}
+                    </h3>
+                    <a
+                      href={project.github}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-gray-600 hover:text-white transition-colors mt-1"
+                    >
+                      <FiExternalLink size={16} />
+                    </a>
+                  </div>
+                  
+                  <p className="text-sm text-gray-500 leading-relaxed">
                     {project.desc}
                   </p>
                   
-                  {/* Tech tags */}
-                  <div className="flex flex-wrap gap-2 mb-4">
+                  <div className="flex flex-wrap gap-2 pt-1">
                     {project.tech.map(tech => (
-                      <span key={tech} className="px-2 py-1 text-xs bg-gray-800 rounded-full text-gray-300">
+                      <span 
+                        key={tech} 
+                        className="text-[11px] text-gray-500 px-2.5 py-1 rounded-full border border-white/5"
+                      >
                         {tech}
                       </span>
                     ))}
-                  </div>
-
-                  {/* Demo Status Badge and Bottom Icons */}
-                  <div className="flex items-center justify-between">
-                    <div className="flex gap-2">
-                      {!project.hasLive && (
-                        <span className="text-xs bg-yellow-500/20 text-yellow-500 px-3 py-1 rounded-full border border-yellow-500/30">
-                          ⏳ Demo Soon
-                        </span>
-                      )}
-                      {project.hasLive && (
-                        <span className="text-xs bg-green-500/20 text-green-500 px-3 py-1 rounded-full border border-green-500/30">
-                          🚀 Live Demo
-                        </span>
-                      )}
-                    </div>
-                    
-                    {/* Bottom Icons */}
-                    <div className="flex gap-2">
-                      <motion.a
-                        href={project.github}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        whileHover={{ scale: 1.2 }}
-                        className="text-gray-500 hover:text-orange-500 transition-colors"
-                      >
-                        <FiGithub size={16} />
-                      </motion.a>
-                      
-                      {project.hasLive ? (
-                        <motion.a
-                          href={project.live}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          whileHover={{ scale: 1.2 }}
-                          className="text-gray-500 hover:text-orange-500 transition-colors"
-                        >
-                          <FiExternalLink size={16} />
-                        </motion.a>
-                      ) : (
-                        <div className="relative group/tooltip">
-                          <FiExternalLink size={16} className="text-gray-700 cursor-not-allowed" />
-                          <div className="absolute -bottom-8 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white text-[10px] px-2 py-1 rounded whitespace-nowrap opacity-0 group-hover/tooltip:opacity-100 transition-opacity">
-                            Demo coming soon
-                          </div>
-                        </div>
-                      )}
-                    </div>
                   </div>
                 </div>
               </motion.div>
@@ -905,594 +708,245 @@ const navigateToSection = (sectionId) => {
         </div>
       </section>
 
-      {/* CONTACT SECTION - Modern UI Update */}
-<section id="contact" className="py-24 px-10 relative overflow-hidden">
-  {/* Animated background elements */}
-  <div className="absolute inset-0">
-    <motion.div 
-      animate={{ 
-        scale: [1, 1.2, 1],
-        opacity: [0.1, 0.2, 0.1],
-      }}
-      transition={{ duration: 8, repeat: Infinity }}
-      className="absolute top-20 left-20 w-72 h-72 bg-orange-500 rounded-full blur-3xl opacity-10"
-    />
-    <motion.div 
-      animate={{ 
-        scale: [1, 1.3, 1],
-        opacity: [0.1, 0.2, 0.1],
-      }}
-      transition={{ duration: 10, repeat: Infinity }}
-      className="absolute bottom-20 right-20 w-80 h-80 bg-pink-500 rounded-full blur-3xl opacity-10"
-    />
-    
-    {/* Grid overlay */}
-    <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px]"></div>
-  </div>
-
-  <div className="max-w-5xl mx-auto relative z-10">
-    {/* Section Header */}
-    <motion.div
-      initial={{ opacity: 0, y: 50 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true }}
-      className="text-center mb-16"
-    >
-      <h2 className="text-4xl md:text-5xl font-bold mb-4">
-        Get In <span className="bg-gradient-to-r from-orange-500 to-pink-500 bg-clip-text text-transparent">Touch</span>
-      </h2>
-      <div className="w-24 h-1 bg-gradient-to-r from-orange-500 to-pink-500 mx-auto rounded-full"></div>
-      <p className="text-gray-400 mt-4 max-w-2xl mx-auto">
-        Let's connect and discuss how we can work together
-      </p>
-    </motion.div>
-
-    {/* Contact Cards Grid */}
-    <div className="grid md:grid-cols-3 gap-6 mb-8">
-      {/* Email Card */}
-      <motion.div
-        initial={{ opacity: 0, y: 30 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.1 }}
-        viewport={{ once: true }}
-        whileHover={{ y: -8 }}
-        className="group relative bg-gradient-to-br from-gray-900 to-black p-8 rounded-2xl border border-gray-800 hover:border-orange-500 transition-all"
-      >
-        <div className="absolute inset-0 bg-gradient-to-r from-orange-500/10 to-pink-500/10 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity"></div>
-        <div className="relative text-center">
-          <div className="w-16 h-16 mx-auto mb-4 bg-orange-500/10 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform">
-            <FiMail className="text-orange-500" size={32} />
-          </div>
-          <h3 className="text-xl font-semibold mb-2">Email</h3>
-          <a 
-            href={socialLinks.email} 
-            className="text-gray-400 hover:text-orange-500 transition-colors text-sm break-all"
-          >
-            fidfidha07@gmail.com
-          </a>
-        </div>
-      </motion.div>
-
-      {/* Phone Card */}
-      <motion.div
-        initial={{ opacity: 0, y: 30 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.2 }}
-        viewport={{ once: true }}
-        whileHover={{ y: -8 }}
-        className="group relative bg-gradient-to-br from-gray-900 to-black p-8 rounded-2xl border border-gray-800 hover:border-orange-500 transition-all"
-      >
-        <div className="absolute inset-0 bg-gradient-to-r from-orange-500/10 to-pink-500/10 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity"></div>
-        <div className="relative text-center">
-          <div className="w-16 h-16 mx-auto mb-4 bg-orange-500/10 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform">
-            <svg className="w-8 h-8 text-orange-500" fill="currentColor" viewBox="0 0 20 20">
-              <path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z"/>
-            </svg>
-          </div>
-          <h3 className="text-xl font-semibold mb-2">Phone</h3>
-          <a 
-            href="tel:+919633452534" 
-            className="text-gray-400 hover:text-orange-500 transition-colors text-sm"
-          >
-            +91 9633452534
-          </a>
-        </div>
-      </motion.div>
-
-      {/* Location Card */}
-      <motion.div
-        initial={{ opacity: 0, y: 30 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.3 }}
-        viewport={{ once: true }}
-        whileHover={{ y: -8 }}
-        className="group relative bg-gradient-to-br from-gray-900 to-black p-8 rounded-2xl border border-gray-800 hover:border-orange-500 transition-all"
-      >
-        <div className="absolute inset-0 bg-gradient-to-r from-orange-500/10 to-pink-500/10 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity"></div>
-        <div className="relative text-center">
-          <div className="w-16 h-16 mx-auto mb-4 bg-orange-500/10 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform">
-            <svg className="w-8 h-8 text-orange-500" fill="currentColor" viewBox="0 0 20 20">
-              <path fillRule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd"/>
-            </svg>
-          </div>
-          <h3 className="text-xl font-semibold mb-2">Location</h3>
-          <span className="text-gray-400 text-sm">
-            Malappuram, Kerala, India
-          </span>
-        </div>
-      </motion.div>
-    </div>
-
-    {/* Bottom Section - Social & Resume */}
-    <motion.div
-      initial={{ opacity: 0, y: 30 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      transition={{ delay: 0.4 }}
-      viewport={{ once: true }}
-      className="bg-gradient-to-br from-gray-900/50 to-black/50 backdrop-blur-sm p-8 rounded-2xl border border-gray-800"
-    >
-      <div className="flex flex-col md:flex-row items-center justify-between gap-6">
-        {/* Social Icons */}
-        <div className="flex gap-4">
-          <motion.a
-            whileHover={{ y: -5, scale: 1.2 }}
-            href={socialLinks.instagram}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="p-3 bg-gray-800 rounded-xl hover:bg-orange-500 transition-all duration-300"
-          >
-            <FiInstagram size={22} className="text-gray-300" />
-          </motion.a>
-          <motion.a
-            whileHover={{ y: -5, scale: 1.2 }}
-            href={socialLinks.github}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="p-3 bg-gray-800 rounded-xl hover:bg-orange-500 transition-all duration-300"
-          >
-            <FiGithub size={22} className="text-gray-300" />
-          </motion.a>
-          <motion.a
-            whileHover={{ y: -5, scale: 1.2 }}
-            href={socialLinks.linkedin}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="p-3 bg-gray-800 rounded-xl hover:bg-orange-500 transition-all duration-300"
-          >
-            <FiLinkedin size={22} className="text-gray-300" />
-          </motion.a>
-        </div>
-
-        {/* Resume Button */}
-        <motion.button
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-          onClick={handleResumeDownload}
-          className="group relative px-8 py-3 bg-gradient-to-r from-orange-500 to-pink-500 rounded-xl overflow-hidden"
-        >
-          <span className="relative z-10 flex items-center gap-2 text-white font-semibold">
-            <FiDownload size={18} className="group-hover:animate-bounce" />
-            Download Resume
-          </span>
-          <motion.div 
-            className="absolute inset-0 bg-gradient-to-r from-pink-500 to-orange-500"
-            initial={{ x: '100%' }}
-            whileHover={{ x: 0 }}
-            transition={{ duration: 0.3 }}
-          />
-        </motion.button>
-      </div>
-
-      {/* Quick Response Text */}
-      <motion.p 
-        initial={{ opacity: 0 }}
-        whileInView={{ opacity: 1 }}
-        transition={{ delay: 0.5 }}
-        className="text-center text-gray-500 text-sm mt-6"
-      >
-      </motion.p>
-    </motion.div>
-  </div>
-</section>
-
-      {/* MESSAGE SECTION - Contact Form */}
-      <section id="message" className="py-24 px-10 relative bg-gradient-to-b from-black via-gray-900 to-black">
-        <div className="max-w-4xl mx-auto">
-          <motion.h2 
-            initial={{ opacity: 0, y: 50 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="text-4xl md:text-5xl font-bold text-center mb-6"
-          >
-            Send Me a <span className="bg-gradient-to-r from-orange-500 to-pink-500 bg-clip-text text-transparent">Message</span>
-          </motion.h2>
+      {/* CONTACT SECTION */}
+      <section id="contact" className="py-32 px-6 relative">
+        <div className="max-w-6xl mx-auto">
           
-          <motion.p
+          <motion.div
             initial={{ opacity: 0 }}
             whileInView={{ opacity: 1 }}
-            transition={{ delay: 0.2 }}
             viewport={{ once: true }}
-            className="text-gray-400 text-center mb-12"
+            className="flex items-center gap-4 mb-16"
           >
-            Have a question or want to work together? Drop me a message!
-          </motion.p>
+            <span className="text-xs text-orange-500 tracking-widest uppercase">04</span>
+            <div className="h-px flex-1 bg-white/5 max-w-[60px]"></div>
+            <span className="text-xs text-gray-600 tracking-widest uppercase">Contact</span>
+          </motion.div>
 
-          {/* Success Message */}
-          {showSuccess && (
+          <div className="grid lg:grid-cols-2 gap-16 lg:gap-24">
+            
+            {/* Left - Info */}
             <motion.div
-              initial={{ opacity: 0, y: -20 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="mb-6 p-4 bg-green-500/20 border border-green-500/50 rounded-lg text-green-500 text-center"
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
             >
-              ✅ Message sent successfully! I'll get back to you soon.
-            </motion.div>
-          )}
+              <h2 className="text-3xl sm:text-4xl font-bold tracking-tight mb-6">
+                Let's create something
+                <span className="text-gray-500"> together.</span>
+              </h2>
 
-          {/* Error Message */}
-          {showError && (
-            <motion.div
-              initial={{ opacity: 0, y: -20 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="mb-6 p-4 bg-red-500/20 border border-red-500/50 rounded-lg text-red-500 text-center"
-            >
-              ❌ Failed to send message. Please try again.
-            </motion.div>
-          )}
+              <p className="text-gray-400 leading-relaxed mb-12 max-w-md">
+                I'm always open to discussing new projects, creative ideas, or opportunities 
+                to be part of your vision.
+              </p>
 
-          <motion.form
-            ref={formRef}
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3 }}
-            viewport={{ once: true }}
-            className="bg-gradient-to-br from-gray-900 to-black p-8 rounded-2xl border border-gray-800 shadow-2xl"
-            onSubmit={handleSubmit}
-          >
-            <div className="grid md:grid-cols-2 gap-6 mb-6">
-              {/* Name Input */}
-              <div className="relative">
-                <input
-                  type="text"
-                  name="name"
-                  id="name"
-                  value={formData.name}
-                  onChange={handleInputChange}
-                  required
-                  className="w-full px-4 py-3 bg-gray-800/50 border border-gray-700 rounded-lg focus:border-orange-500 focus:outline-none transition-colors text-white peer"
-                  placeholder=" "
-                  disabled={isSubmitting}
-                />
-                <label 
-                  htmlFor="name"
-                  className="absolute left-4 -top-2.5 bg-gray-900 px-2 text-sm text-gray-400 transition-all peer-placeholder-shown:text-base peer-placeholder-shown:top-3 peer-placeholder-shown:bg-transparent peer-placeholder-shown:text-gray-500 peer-focus:-top-2.5 peer-focus:text-sm peer-focus:bg-gray-900 peer-focus:text-orange-500"
-                >
-                  Your Name
-                </label>
+              {/* Contact Details */}
+              <div className="space-y-6">
+                {[
+                  { icon: FiMail, label: 'Email', value: 'fidfidha07@gmail.com', href: socialLinks.email },
+                  { icon: null, label: 'Phone', value: '+91 9633452534', href: socialLinks.phone, isPhone: true },
+                  { icon: null, label: 'Location', value: 'Malappuram, Kerala, India', isLocation: true },
+                ].map((item, i) => (
+                  <motion.div
+                    key={i}
+                    initial={{ opacity: 0, x: -20 }}
+                    whileInView={{ opacity: 1, x: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ delay: i * 0.1 }}
+                    className="flex items-start gap-4"
+                  >
+                    <div className="w-10 h-10 rounded-lg bg-white/5 border border-white/5 flex items-center justify-center flex-shrink-0">
+                      {item.icon ? (
+                        <item.icon size={16} className="text-orange-500" />
+                      ) : item.isPhone ? (
+                        <svg className="w-4 h-4 text-orange-500" fill="currentColor" viewBox="0 0 20 20">
+                          <path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z"/>
+                        </svg>
+                      ) : (
+                        <svg className="w-4 h-4 text-orange-500" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd"/>
+                        </svg>
+                      )}
+                    </div>
+                    <div>
+                      <div className="text-xs text-gray-600 mb-1">{item.label}</div>
+                      {item.href ? (
+                        <a href={item.href} className="text-sm text-gray-300 hover:text-orange-400 transition-colors">
+                          {item.value}
+                        </a>
+                      ) : (
+                        <div className="text-sm text-gray-300">{item.value}</div>
+                      )}
+                    </div>
+                  </motion.div>
+                ))}
               </div>
 
-              {/* Email Input */}
-              <div className="relative">
-                <input
-                  type="email"
-                  name="email"
-                  id="email"
-                  value={formData.email}
-                  onChange={handleInputChange}
-                  required
-                  className="w-full px-4 py-3 bg-gray-800/50 border border-gray-700 rounded-lg focus:border-orange-500 focus:outline-none transition-colors text-white peer"
-                  placeholder=" "
-                  disabled={isSubmitting}
-                />
-                <label 
-                  htmlFor="email"
-                  className="absolute left-4 -top-2.5 bg-gray-900 px-2 text-sm text-gray-400 transition-all peer-placeholder-shown:text-base peer-placeholder-shown:top-3 peer-placeholder-shown:bg-transparent peer-placeholder-shown:text-gray-500 peer-focus:-top-2.5 peer-focus:text-sm peer-focus:bg-gray-900 peer-focus:text-orange-500"
-                >
-                  Your Email
-                </label>
+              {/* Social */}
+              <div className="flex gap-4 mt-12 pt-8 border-t border-white/5">
+                {[
+                  { icon: FiGithub, link: socialLinks.github },
+                  { icon: FiLinkedin, link: socialLinks.linkedin },
+                  { icon: FiInstagram, link: socialLinks.instagram },
+                ].map((social, i) => (
+                  <motion.a
+                    key={i}
+                    href={social.link}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    whileHover={{ y: -3 }}
+                    className="w-10 h-10 rounded-lg bg-white/5 border border-white/5 flex items-center justify-center text-gray-500 hover:text-white hover:border-white/20 transition-all"
+                  >
+                    <social.icon size={16} />
+                  </motion.a>
+                ))}
               </div>
-            </div>
+            </motion.div>
 
-            {/* Subject Input */}
-            <div className="relative mb-6">
-              <input
-                type="text"
-                name="subject"
-                id="subject"
-                value={formData.subject}
-                onChange={handleInputChange}
-                required
-                className="w-full px-4 py-3 bg-gray-800/50 border border-gray-700 rounded-lg focus:border-orange-500 focus:outline-none transition-colors text-white peer"
-                placeholder=" "
-                disabled={isSubmitting}
-              />
-              <label 
-                htmlFor="subject"
-                className="absolute left-4 -top-2.5 bg-gray-900 px-2 text-sm text-gray-400 transition-all peer-placeholder-shown:text-base peer-placeholder-shown:top-3 peer-placeholder-shown:bg-transparent peer-placeholder-shown:text-gray-500 peer-focus:-top-2.5 peer-focus:text-sm peer-focus:bg-gray-900 peer-focus:text-orange-500"
-              >
-                Subject
-              </label>
-            </div>
-
-            {/* Message Textarea */}
-            <div className="relative mb-6">
-              <textarea
-                name="message"
-                id="message"
-                rows="5"
-                value={formData.message}
-                onChange={handleInputChange}
-                required
-                className="w-full px-4 py-3 bg-gray-800/50 border border-gray-700 rounded-lg focus:border-orange-500 focus:outline-none transition-colors text-white peer resize-none"
-                placeholder=" "
-                disabled={isSubmitting}
-              ></textarea>
-              <label 
-                htmlFor="message"
-                className="absolute left-4 -top-2.5 bg-gray-900 px-2 text-sm text-gray-400 transition-all peer-placeholder-shown:text-base peer-placeholder-shown:top-3 peer-placeholder-shown:bg-transparent peer-placeholder-shown:text-gray-500 peer-focus:-top-2.5 peer-focus:text-sm peer-focus:bg-gray-900 peer-focus:text-orange-500"
-              >
-                Your Message
-              </label>
-            </div>
-
-            {/* Submit Button */}
-            <motion.button
-              type="submit"
-              disabled={isSubmitting}
-              whileHover={{ scale: isSubmitting ? 1 : 1.05 }}
-              whileTap={{ scale: isSubmitting ? 1 : 0.95 }}
-              className={`w-full md:w-auto px-8 py-3 bg-gradient-to-r from-orange-500 to-pink-500 text-white font-semibold rounded-lg hover:shadow-lg transition-all flex items-center justify-center gap-2 mx-auto ${
-                isSubmitting ? 'opacity-50 cursor-not-allowed' : ''
-              }`}
+            {/* Right - Form */}
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.2 }}
             >
-              {isSubmitting ? (
-                <>
-                  <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                  Sending...
-                </>
-              ) : (
-                <>
-                  <FiSend size={18} />
-                  Send Message
-                </>
+              {/* Success/Error Messages */}
+              {showSuccess && (
+                <motion.div
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="mb-6 p-4 rounded-lg bg-green-500/10 border border-green-500/20 text-green-400 text-sm"
+                >
+                  ✓ Message sent successfully. I'll get back to you soon.
+                </motion.div>
               )}
-            </motion.button>
-          </motion.form>
+              {showError && (
+                <motion.div
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="mb-6 p-4 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-sm"
+                >
+                  ✗ Something went wrong. Please try again.
+                </motion.div>
+              )}
+
+              <form onSubmit={handleSubmit} className="space-y-5">
+                <div className="grid sm:grid-cols-2 gap-5">
+                  <div>
+                    <label className="block text-xs text-gray-500 mb-2 tracking-wide">Name</label>
+                    <input
+                      type="text"
+                      id="name"
+                      value={formData.name}
+                      onChange={handleInputChange}
+                      required
+                      disabled={isSubmitting}
+                      className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-sm text-white placeholder-gray-600 focus:outline-none focus:border-orange-500/50 transition-colors disabled:opacity-50"
+                      placeholder="Your name"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs text-gray-500 mb-2 tracking-wide">Email</label>
+                    <input
+                      type="email"
+                      id="email"
+                      value={formData.email}
+                      onChange={handleInputChange}
+                      required
+                      disabled={isSubmitting}
+                      className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-sm text-white placeholder-gray-600 focus:outline-none focus:border-orange-500/50 transition-colors disabled:opacity-50"
+                      placeholder="your@email.com"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-xs text-gray-500 mb-2 tracking-wide">Subject</label>
+                  <input
+                    type="text"
+                    id="subject"
+                    value={formData.subject}
+                    onChange={handleInputChange}
+                    required
+                    disabled={isSubmitting}
+                    className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-sm text-white placeholder-gray-600 focus:outline-none focus:border-orange-500/50 transition-colors disabled:opacity-50"
+                    placeholder="What's this about?"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs text-gray-500 mb-2 tracking-wide">Message</label>
+                  <textarea
+                    id="message"
+                    value={formData.message}
+                    onChange={handleInputChange}
+                    required
+                    rows="5"
+                    disabled={isSubmitting}
+                    className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-sm text-white placeholder-gray-600 focus:outline-none focus:border-orange-500/50 transition-colors resize-none disabled:opacity-50"
+                    placeholder="Tell me about your project..."
+                  ></textarea>
+                </div>
+
+                <motion.button
+                  type="submit"
+                  disabled={isSubmitting}
+                  whileHover={{ scale: isSubmitting ? 1 : 1.01 }}
+                  whileTap={{ scale: isSubmitting ? 1 : 0.99 }}
+                  className={`w-full py-3.5 bg-white text-black text-sm font-medium rounded-lg transition-all duration-300 flex items-center justify-center gap-2 ${
+                    isSubmitting ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-200'
+                  }`}
+                >
+                  {isSubmitting ? (
+                    <>
+                      <div className="w-4 h-4 border-2 border-black border-t-transparent rounded-full animate-spin"></div>
+                      Sending...
+                    </>
+                  ) : (
+                    <>
+                      Send Message
+                      <FiSend size={14} />
+                    </>
+                  )}
+                </motion.button>
+              </form>
+            </motion.div>
+          </div>
         </div>
       </section>
 
-     {/* FOOTER SECTION */}
-<footer className="relative bg-gradient-to-b from-gray-900 to-black border-t border-gray-800">
-  {/* Animated background elements */}
-  <div className="absolute inset-0 overflow-hidden">
-    <motion.div
-      animate={{ 
-        scale: [1, 1.2, 1],
-        opacity: [0.1, 0.2, 0.1],
-      }}
-      transition={{ duration: 8, repeat: Infinity }}
-      className="absolute -top-20 -right-20 w-64 h-64 bg-orange-500 rounded-full blur-3xl opacity-10"
-    />
-    <motion.div
-      animate={{ 
-        scale: [1, 1.3, 1],
-        opacity: [0.1, 0.2, 0.1],
-      }}
-      transition={{ duration: 10, repeat: Infinity }}
-      className="absolute -bottom-20 -left-20 w-64 h-64 bg-pink-500 rounded-full blur-3xl opacity-10"
-    />
-  </div>
+      {/* FOOTER */}
+      <footer className="border-t border-white/5 py-12 px-6">
+        <div className="max-w-6xl mx-auto">
+          <div className="flex flex-col md:flex-row justify-between items-center gap-6">
+            
+            <div className="flex items-center gap-3">
+              <span className="text-sm font-semibold text-white">
+                Fathima Fidha<span className="text-orange-500">.</span>
+              </span>
+              <span className="text-xs text-gray-600">© {new Date().getFullYear()}</span>
+            </div>
 
-  <div className="max-w-6xl mx-auto px-6 py-12 relative z-10">
-    {/* Main Footer Content */}
-    <div className="grid md:grid-cols-4 gap-8 mb-8">
-      {/* Brand Column */}
-      <div className="col-span-1">
-        <motion.h3 
-          initial={{ opacity: 0, x: -20 }}
-          whileInView={{ opacity: 1, x: 0 }}
-          viewport={{ once: true }}
-          className="text-2xl font-bold bg-gradient-to-r from-orange-500 to-pink-500 bg-clip-text text-transparent mb-4"
-        >
-          Fathima Fidha C P
-        </motion.h3>
-        <p className="text-gray-400 text-sm leading-relaxed">
-          Creating beautiful and responsive web experiences with modern technologies.
-        </p>
-      </div>
+            <div className="flex items-center gap-6 text-xs text-gray-600">
+              <a href="#home" className="hover:text-white transition-colors">Home</a>
+              <a href="#about" className="hover:text-white transition-colors">About</a>
+              <a href="#projects" className="hover:text-white transition-colors">Projects</a>
+              <a href="#contact" className="hover:text-white transition-colors">Contact</a>
+            </div>
 
-      {/* Quick Links */}
-      <div className="col-span-1">
-        <motion.h4 
-          initial={{ opacity: 0, x: -20 }}
-          whileInView={{ opacity: 1, x: 0 }}
-          viewport={{ once: true }}
-          transition={{ delay: 0.1 }}
-          className="text-lg font-semibold text-white mb-4"
-        >
-          Quick Links
-        </motion.h4>
-        <ul className="space-y-2">
-          {['Home', 'About', 'Skills', 'Projects', 'Contact'].map((item, index) => (
-            <motion.li
-              key={item}
-              initial={{ opacity: 0, x: -20 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: 0.1 + index * 0.05 }}
+            <motion.button
+              whileHover={{ y: -3 }}
+              onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+              className="w-8 h-8 rounded-full border border-white/10 flex items-center justify-center text-gray-500 hover:text-white hover:border-white/30 transition-all text-xs"
+              aria-label="Back to top"
             >
-              <a 
-                href={`#${item.toLowerCase()}`}
-                className="text-gray-400 hover:text-orange-500 transition-colors text-sm"
-                onClick={(e) => {
-                  e.preventDefault();
-                  document.getElementById(item.toLowerCase())?.scrollIntoView({
-                    behavior: 'smooth'
-                  });
-                }}
-              >
-                {item}
-              </a>
-            </motion.li>
-          ))}
-        </ul>
-      </div>
-
-      {/* Contact Info - UPDATED with phone and location */}
-      <div className="col-span-1">
-        <motion.h4 
-          initial={{ opacity: 0, x: -20 }}
-          whileInView={{ opacity: 1, x: 0 }}
-          viewport={{ once: true }}
-          transition={{ delay: 0.2 }}
-          className="text-lg font-semibold text-white mb-4"
-        >
-          Contact Info
-        </motion.h4>
-        <ul className="space-y-3 text-sm">
-          {/* Email */}
-          <motion.li 
-            initial={{ opacity: 0, x: -20 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
-            transition={{ delay: 0.25 }}
-            className="flex items-center gap-2 text-gray-400 hover:text-orange-500 transition-colors"
-          >
-            <FiMail size={14} className="text-orange-500 flex-shrink-0" />
-            <a href={socialLinks.email} className="hover:text-orange-500 transition-colors">
-              fidfidha07@gmail.com
-            </a>
-          </motion.li>
-          
-          {/* Phone - NEW */}
-          <motion.li 
-            initial={{ opacity: 0, x: -20 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
-            transition={{ delay: 0.3 }}
-            className="flex items-center gap-2 text-gray-400 hover:text-orange-500 transition-colors"
-          >
-            <svg className="w-4 h-4 text-orange-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-              <path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z"/>
-            </svg>
-            <a href="tel:+1234567890" className="hover:text-orange-500 transition-colors">
-              +91 9633452534 {/* Replace with your number */}
-            </a>
-          </motion.li>
-          
-          {/* Location - NEW */}
-          <motion.li 
-            initial={{ opacity: 0, x: -20 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
-            transition={{ delay: 0.35 }}
-            className="flex items-center gap-2 text-gray-400 hover:text-orange-500 transition-colors"
-          >
-            <svg className="w-4 h-4 text-orange-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-              <path fillRule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd"/>
-            </svg>
-            <span className="hover:text-orange-500 transition-colors">
-              Malappuram, Kerala {/* Replace with your location */}
-            </span>
-          </motion.li>
-        </ul>
-      </div>
-
-      {/* Social Links */}
-      <div className="col-span-1">
-        <motion.h4 
-          initial={{ opacity: 0, x: -20 }}
-          whileInView={{ opacity: 1, x: 0 }}
-          viewport={{ once: true }}
-          transition={{ delay: 0.3 }}
-          className="text-lg font-semibold text-white mb-4"
-        >
-          Follow Me
-        </motion.h4>
-        <div className="flex gap-3">
-          {[
-            { icon: FiInstagram, link: socialLinks.instagram, label: 'Instagram' },
-            // { icon: FiGithub, link: socialLinks.github, label: 'GitHub' },
-            { icon: FiLinkedin, link: socialLinks.linkedin, label: 'LinkedIn' },
-          ].map((social, index) => (
-            <motion.a
-              key={social.label}
-              initial={{ opacity: 0, scale: 0 }}
-              whileInView={{ opacity: 1, scale: 1 }}
-              viewport={{ once: true }}
-              transition={{ delay: 0.35 + index * 0.05 }}
-              whileHover={{ y: -5, scale: 1.1 }}
-              href={social.link}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="p-2 bg-gray-800 rounded-lg hover:bg-orange-500 transition-colors"
-              aria-label={social.label}
-            >
-              <social.icon size={18} className="text-gray-300" />
-            </motion.a>
-          ))}
+              ↑
+            </motion.button>
+          </div>
         </div>
-      </div>
+      </footer>
     </div>
-
-    {/* Divider */}
-    <motion.div 
-      initial={{ scaleX: 0 }}
-      whileInView={{ scaleX: 1 }}
-      viewport={{ once: true }}
-      transition={{ delay: 0.4 }}
-      className="h-px bg-gradient-to-r from-transparent via-orange-500/50 to-transparent mb-6"
-    />
-
-    {/* Copyright and Bottom Bar */}
-    <div className="flex flex-col md:flex-row justify-between items-center gap-4">
-      <motion.p 
-        initial={{ opacity: 0, y: 20 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true }}
-        transition={{ delay: 0.45 }}
-        className="text-gray-400 text-sm"
-      >
-        © {new Date().getFullYear()} Fidha. All rights reserved.
-      </motion.p>
-      
-      <motion.div 
-        initial={{ opacity: 0, y: 20 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true }}
-        transition={{ delay: 0.5 }}
-        className="flex gap-4 text-xs text-gray-500"
-      >
-        <span className="cursor-pointer hover:text-orange-500 transition-colors">Privacy Policy</span>
-        <span className="cursor-pointer hover:text-orange-500 transition-colors">Terms of Service</span>
-        <span className="cursor-pointer hover:text-orange-500 transition-colors">Cookie Policy</span>
-      </motion.div>
-
-      {/* <motion.p 
-        initial={{ opacity: 0, y: 20 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true }}
-        transition={{ delay: 0.55 }}
-        className="text-xs text-gray-600"
-      >
-        Built with React & Tailwind CSS
-      </motion.p> */}
-    </div>
-
-    {/* Back to Top Button */}
-    <motion.button
-      initial={{ opacity: 0, scale: 0 }}
-      whileInView={{ opacity: 1, scale: 1 }}
-      viewport={{ once: true }}
-      transition={{ delay: 0.6 }}
-      whileHover={{ scale: 1.1, y: -5 }}
-      onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-      className="absolute -top-5 right-10 w-10 h-10 bg-gradient-to-r from-orange-500 to-pink-500 rounded-full flex items-center justify-center text-white shadow-lg cursor-pointer hover:shadow-xl transition-all"
-    >
-      ↑
-    </motion.button>
-  </div>
-</footer>
-</div>
   );
 }
 
